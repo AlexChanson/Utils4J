@@ -1,9 +1,6 @@
 package com.alexsxode.utilities;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -11,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPOutputStream;
 
 public class Stuff {
     public static void exportString(String path, String data){
@@ -65,6 +63,34 @@ public class Stuff {
         return runPython(script, args);
     }
 
+    /**
+     * Compresses a string with gzip
+     * @param data the string to be compressed (in system default encoding)
+     * @return a byte array containing the compressed data
+     * @throws IOException
+     */
+    public static byte[] compress(String data) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length());
+        GZIPOutputStream gzip = new GZIPOutputStream(bos);
+        gzip.write(data.getBytes());
+        gzip.close();
+        byte[] compressed = bos.toByteArray();
+        bos.close();
+        return compressed;
+    }
+
+    public static byte[] compress(File f) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        FileInputStream fis = new FileInputStream(f);
+        GZIPOutputStream out = new GZIPOutputStream(bos);
+        Future.transferTo(fis, out);
+        out.close();
+        fis.close();
+        byte[] compressed = bos.toByteArray();
+        bos.close();
+        return compressed;
+    }
+
     public static String md5(String input){
         MessageDigest md = null;
         try {
@@ -73,6 +99,20 @@ public class Stuff {
             e.printStackTrace();
         }
         return bytesToHex(md.digest(input.getBytes()));
+    }
+
+    public static String sha256(String input){
+        String hash = "";
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] h = digest.digest(input.getBytes());
+            hash = bytesToHex(h);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return hash;
     }
 
     public static String bytesToHex(byte[] bytes) {
