@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.function.Function;
 
 /**
  * @author Alexandre Chanson
@@ -26,6 +27,7 @@ public class HttpAns {
 
     private ArrayList<String> header = new ArrayList<>();
     private int len = -1;
+    Function<OutputStream, Boolean> bodyFactory;
 
     public HttpAns() {
         header.add(_200);
@@ -37,7 +39,7 @@ public class HttpAns {
     }
 
 
-    public String build(){
+    String build(){
         StringBuilder r = new StringBuilder();
         header.set(1, "Date: " + new Date());
         for (String s : header) {
@@ -67,8 +69,13 @@ public class HttpAns {
         return this;
     }
 
-    public HttpAns setCompressed(){
+    HttpAns setCompressed(){
         header.add("Content-Encoding: gzip");
+        return this;
+    }
+
+    public HttpAns setBody(Function<OutputStream, Boolean> bodyMaker){
+        bodyFactory = bodyMaker;
         return this;
     }
 
@@ -77,7 +84,7 @@ public class HttpAns {
      * @param out A valid output stream (i.e. thee socket's out)
      * @throws IOException
      */
-    public void printTo(OutputStream out) throws IOException {
+    void printTo(OutputStream out) throws IOException {
         out.write(this.build().getBytes());
     }
 }
