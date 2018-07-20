@@ -31,11 +31,11 @@ class Worker implements Runnable {
 
             if (requete.supportsGzip()){
                 ans.setCompressed();
-                Utils.sendHeader(out, ans);
+                sendHeader(out, ans);
                 GZIPOutputStream compressor = new GZIPOutputStream(out);
                 ans.bodyFactory.apply(compressor);
             }else {
-                Utils.sendHeader(out, ans);
+                sendHeader(out, ans);
                 ans.bodyFactory.apply(out);
             }
 
@@ -44,6 +44,11 @@ class Worker implements Runnable {
             System.out.println("--- SOCKET EXCEPTION ---");
             e.printStackTrace();
         }
+    }
+
+    private static void sendHeader(OutputStream out, HttpAns ans) throws IOException {
+        ans.printTo(out);
+        out.write(new byte[]{0x0d, 0x0a});
     }
 
 }
