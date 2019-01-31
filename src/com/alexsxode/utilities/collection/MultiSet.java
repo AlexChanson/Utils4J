@@ -10,9 +10,13 @@ import java.util.function.Function;
  */
 public class MultiSet<E> implements Collection<E> {
     HashMap<E, Integer> hashMap;
+    Class<?> keyType;
 
     public MultiSet() {
         hashMap = new HashMap<>();
+    }
+    public MultiSet(Class<E> type){
+        keyType = type;
     }
 
     @Override
@@ -59,12 +63,14 @@ public class MultiSet<E> implements Collection<E> {
 
     @Override
     public boolean add(E e) {
+        if (keyType == null) keyType = e.getClass();
         int c = hashMap.getOrDefault(e, 0) + 1;
         hashMap.put(e, c);
         return true;
     }
 
     public boolean add(E e, int count) {
+        if (keyType == null) keyType = e.getClass();
         int c = hashMap.getOrDefault(e, 0) + count;
         hashMap.put(e, c);
         return true;
@@ -87,7 +93,27 @@ public class MultiSet<E> implements Collection<E> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return false;
+        if (c.getClass() != this.getClass())
+            throw new UnsupportedOperationException("Only supported for other multisets");
+        else {
+            MultiSet other = (MultiSet) c;
+            if (other.keyType == null || keyType == null) {
+                System.err.println("[MultiSet] Warning no support for 'raw' types in containsAll, use typed constructor or add elements to the multiset.");
+                return false;
+            }
+            if (other.keyType != this.keyType)
+                return false;
+            if (hashMap.keySet().containsAll(other.hashMap.keySet())){
+                for (E key : hashMap.keySet()) {
+                    if (hashMap.get(key) >= ((Integer) other.hashMap.get(key)))
+                        return false;
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+
     }
 
     @Override
