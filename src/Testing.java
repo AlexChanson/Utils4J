@@ -7,8 +7,8 @@ import java.util.Arrays;
 
 public class Testing {
     public static void main(String[] args) {
-        MultiSet<Color> colors = new MultiSet<>();
-        MultiSet<Rectangle> rectangles = new MultiSet<>();
+        MultiSet<Color> colors = new MultiSet<>(Color.class);
+        MultiSet<Rectangle> rectangles = new MultiSet<>(Rectangle.class);
         colors.add(new Color(1,2,3));
         System.out.println(((ParameterizedType) colors.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
         System.out.println(rectangles.getClass());

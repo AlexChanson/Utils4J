@@ -16,6 +16,7 @@ public class MultiSet<E> implements Collection<E> {
         hashMap = new HashMap<>();
     }
     public MultiSet(Class<E> type){
+        this();
         keyType = type;
     }
 
